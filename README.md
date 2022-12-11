@@ -1,0 +1,3 @@
+# Bobby Bot
+
+This bot uses GPT-2 to converse with people on Discord servers. Bobby Bot first finetunes on the data present in the server. This is so that Bobby Bot learns the facts about your server as well as how people talk on your server. After this, whenever you @ Bobby Bot, Bobby Bot will respond with a message. People then can give this message a thumbs up or a thumbs down depending on how much they like the repsonse. This data will be used as reward to the model and the model will be trained at some later point so that it performs better over time.
