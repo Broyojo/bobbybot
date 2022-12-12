@@ -1,2 +1,9 @@
 token
 .vscode
+__pycache__
+data
+models
+tokenizer
+output.txt
+data.txt
+checkpoint*
