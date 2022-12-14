@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "2d84a33e8f7f79a868621ef1152e049aa45692b3a9a2e1c8f6ab6d7bb821f346"
+            "sha256": "f458df4134500a9dcaec5e99a5a285de6db5bf41fb3aced6f4299d76310e4e28"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,6 +16,13 @@
         ]
     },
     "default": {
+        "about-time": {
+            "hashes": [
+                "sha256:586b329450c9387d1ae8c42d2db4f5b4c57a54508d0f1b7bb00322ffd5ce9f9b",
+                "sha256:96841beb3f9b5de1cbb323d2bdb0fa9abdecbc46f2d546b9b3c2483d23daa17a"
+            ],
+            "version": "==3.1.1"
+        },
         "aiohttp": {
             "hashes": [
                 "sha256:02f9a2c72fc95d59b881cf38a4b2be9381b9527f9d328771e90f72ac76f31ad8",
@@ -116,6 +123,14 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==1.3.1"
+        },
+        "alive-progress": {
+            "hashes": [
+                "sha256:089757c8197f27ad972ba27e1060f6db92368d83c736884e159034fd74865323",
+                "sha256:5503ffca0a0607d5f0d24d3b10a718fe50e375470fa07602b246333eb7ec88ee"
+            ],
+            "index": "pypi",
+            "version": "==2.4.1"
         },
         "async-timeout": {
             "hashes": [
@@ -271,6 +286,12 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==2022.11.0"
+        },
+        "grapheme": {
+            "hashes": [
+                "sha256:44c2b9f21bbe77cfb05835fec230bd435954275267fea1858013b102f8603cca"
+            ],
+            "version": "==0.6.0"
         },
         "huggingface-hub": {
             "hashes": [
