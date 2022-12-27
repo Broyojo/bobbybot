@@ -1,6 +1,9 @@
+import logging
+
 import discord
-import torch
 from transformers import GPT2LMHeadModel, GPT2TokenizerFast
+
+discord.utils.setup_logging()
 
 
 class Bobby(discord.Client):
@@ -8,88 +11,80 @@ class Bobby(discord.Client):
         intents = discord.Intents.default()
         intents.message_content = True
         super(Bobby, self).__init__(intents=intents)
-        self.tokenizer = GPT2TokenizerFast.from_pretrained("./tokenizer")
-        self.tokenizer.add_special_tokens(
-            {
-                "bos_token": "<s>",
-                "pad_token": "<pad>",
-                "eos_token": "</s>",
-                "unk_token": "<unk>",
-                "mask_token": "<mask>",
-            }
-        )
-        self.model = GPT2LMHeadModel.from_pretrained("./models/model3/").to("cuda")
 
-    def evaluate_model(self, prompt: str) -> str:
-        with torch.no_grad():
-            print(f"Model has {self.model.num_parameters():,} parameters")
+        self.tokenizer = GPT2TokenizerFast.from_pretrained("gpt2", padding_side="left")
+        self.tokenizer.pad_token = self.tokenizer.eos_token
 
-            encoding = self.tokenizer(
-                prompt,
-                padding=True,
-                return_tensors="pt",
-                truncation=True,
-                max_length=1024,
-            ).to("cuda")
-
-            # refer to https://huggingface.co/blog/how-to-generate
-            generated_ids = self.model.generate(
-                **encoding,
-                max_length=1024,
-                # max_new_tokens=512,
-                temperature=1,
-                num_return_sequences=1,
-                top_k=50,
-                top_p=1,
-                do_sample=True,
-                # repetition_penalty=1.1,
-                bos_token_id=self.tokenizer.bos_token_id,
-                eos_token_id=self.tokenizer.eos_token_id,
-                pad_token_id=self.tokenizer.pad_token_id,
-            )[0]
-
-            generated_text = self.tokenizer.decode(
-                generated_ids, skip_special_tokens=True
-            )
-
-            print(generated_text)
-
-            prompt = prompt.replace("<s>", "").replace("</s>", "")
-
-            length_of_new = len(generated_text) - len(prompt)
-
-            generated_text = generated_text[
-                max(len(generated_text) - length_of_new, 0) : len(generated_text)
-            ]
-
-            print(generated_text)
-
-            generated_text = generated_text.replace("\\n", "\n")
-
-            if generated_text == "":
-                generated_text = " "
-
-            return generated_text[:2000]
+        self.model = GPT2LMHeadModel.from_pretrained("./models/model7").to("cuda")
 
     async def on_ready(self):
-        print("Logged on as", self.user)
+        logging.info(f"Logged in as {self.user}")
+
+    def generate_next_message(self, prompt, max_message_length):
+        # gather message history
+        # tokenize message history
+        # generate next message
+
+        encoded = self.tokenizer(
+            prompt,
+            padding=True,
+            return_tensors="pt",
+            truncation=True,
+            max_length=1024 - max_message_length,
+        ).to("cuda")
+
+        # refer to https://huggingface.co/blog/how-to-generate
+        generated_ids = self.model.generate(
+            **encoded,
+            # max_length=1024,
+            max_new_tokens=max_message_length,
+            temperature=1,
+            num_return_sequences=1,
+            top_k=50,
+            top_p=1,
+            do_sample=True,
+            # repetition_penalty=1.1,
+            bos_token_id=self.tokenizer.bos_token_id,
+            eos_token_id=self.tokenizer.eos_token_id,
+            pad_token_id=self.tokenizer.pad_token_id,
+        )[0]
+
+        generated_text = self.tokenizer.decode(generated_ids, skip_special_tokens=True)
+
+        return generated_text
 
     async def on_message(self, message: discord.Message):
-        # don't respond to ourselves
         if message.author == self.user:
             return
+        if "bobby" not in message.clean_content.lower():
+            return
+        """
+        when receive new message ->
+            generate next message
 
-        # if self.user in message.mentions:
-        past_messages = ""
+            if next message is authored by you -> say it
+            otherwise -> don't say anything
+        """
 
-        async for message in message.channel.history(limit=20, oldest_first=False):
-            content = message.content.replace("\n", "\\n")
-            past_messages = f"{message.author}:<s>{content}</s>" + past_messages
-        response = self.evaluate_model(
-            past_messages[max(len(past_messages) - 512, 0) : len(past_messages)]
-            + "Bobby#5900:<s>"
-        )
-        await message.channel.send(response)
+        async for msg in message.channel.history(limit=1, oldest_first=False):
+            c = msg.clean_content.replace("\n", "\\n")
+            msg = f"{msg.author.display_name}:{c}<|endoftext|>"
+            print(msg)
+
+        response = self.generate_next_message(msg + "Bobby:", max_message_length=200)[
+            len(msg.replace("<|endoftext|>", "")) :
+        ].split(":", 1)
+
+        print(response)
+
+        author = response[0]
+        content = response[1]
+
+        if author != "Bobby":
+            return
+        if content == "":
+            content = " "
+        await message.channel.send(content)
 
 
 def main():

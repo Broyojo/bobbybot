@@ -12,6 +12,8 @@ torch = "*"
 torchvision = "*"
 torchaudio = "*"
 alive-progress = "*"
+deepspeed = "*"
+accelerate = "*"
 
 [dev-packages]
 black = "*"
