@@ -56,7 +56,7 @@ class Bobby(discord.Client):
     async def on_message(self, message: discord.Message):
         if message.author == self.user:
             return
-        if "bobby" not in message.clean_content.lower():
+        if self.user.display_name.lower() not in message.clean_content.lower():
             return
         """
         when receive new message ->
@@ -71,16 +71,16 @@ class Bobby(discord.Client):
             msg = f"{msg.author.display_name}:{c}<|endoftext|>"
             print(msg)
 
-        response = self.generate_next_message(msg + "Bobby:", max_message_length=200)[
-            len(msg.replace("<|endoftext|>", "")) :
-        ].split(":", 1)
+        response = self.generate_next_message(
+            msg + f"{self.user.display_name}:", max_message_length=200
+        )[len(msg.replace("<|endoftext|>", "")) :].split(":", 1)
 
         print(response)
 
         author = response[0]
         content = response[1]
 
-        if author != "Bobby":
+        if author != self.user.display_name:
             return
         if content == "":
             content = " "
